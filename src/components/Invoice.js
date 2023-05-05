@@ -11,12 +11,23 @@ import { Square } from '@mui/icons-material';
 
 export function Pay() {
   const paperstyle={padding:'50px 20px', width:600, margin:"20px auto"}
-  const [invoice, setInvoice]=useState([])
+  const [invoice, setInvoice]=useState({})
 
   const navigate = useNavigate();
   const handlePay=(e)=>{
     e.preventDefault()
-    navigate(`/`)
+    fetch(`http://localhost:8081/invoice/pay/${localStorage.getItem('reference')}`,{
+      method:"PATCH",
+      headers:{"Content-Type":"application/json"},
+    }).then(async (result)=>{
+      if(result.status==200){
+          alert('Successfully PAID Invoice : '+localStorage.getItem('reference'));
+          navigate(`/`)
+      } else {
+        alert('Finance service is down, try again later.');
+        return;
+      }
+    })
   }
   const handleFindAnotherInvoice=(e)=>{
     e.preventDefault()
@@ -24,11 +35,13 @@ export function Pay() {
   }
 
   useEffect(()=>{
-    setInvoice([{
-        id:12,
-        invoiceNumber:"12",
-        dateInvoice:"1222222"
-    }])
+    fetch(`http://localhost:8081/invoice/${localStorage.getItem('reference')}`)
+    .then(res=>res.json())
+    .then(async (result)=>{
+      toString(result);
+      setInvoice(result);
+    }
+    )
   },[])
   return (
     <Container>
@@ -36,9 +49,12 @@ export function Pay() {
     <Paper elevation={3} style={paperstyle}>
     {
         <Paper elevation={6} style={{margin:"10px",padding:"15px", textAlign:"left"}} key={invoice.id}>
-          invoiceNumber:{"  "+invoice.invoiceNumber}<br/>
-          invoiceNumber:{"  "+invoice.invoiceNumber}<br/>
-          <Button variant="contained" onClick={handlePay}>Pay</Button>
+          Reference:{"  "+invoice.reference}<br/>
+          Amount:{"  "+invoice.amount}<br/>
+          Due Date:{"  "+invoice.dueDate}<br/>
+          Status:{"  "+invoice.Status}<br/>
+          Type:{"  "+invoice.types}<br/>
+          <Button disabled={invoice.Status=="paid"} variant="contained" onClick={handlePay}>Pay</Button>
         </Paper>
         
     }
@@ -57,6 +73,7 @@ export function FinanceHome() {
 
   const handleFindInvoice=(e)=>{
     e.preventDefault()
+    localStorage.setItem('reference',referenceCode);
     navigate(`/invoice`)
   }
 
@@ -78,10 +95,14 @@ export function FinanceHome() {
       <br></br>
       <br></br>
       <Paper square style={paperstyle} >
-      <TextField id="outlined-basic" label="Reference" variant="outlined" fullWidth 
+      <TextField id="outlined-basic" label="Reference Code" variant="outlined" fullWidth 
       value={referenceCode}
       onChange={(e)=>setReferenceCode(e.target.value)}
       />
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
       <Button variant="contained" size='large' onClick={handleFindInvoice}>Find Invoice</Button>
       </Paper>
     </Box>

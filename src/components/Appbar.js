@@ -22,7 +22,7 @@ export default function Appbar() {
             <MenuIcon />
           </IconButton> */}
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Welcome to Student Portal
+            Welcome to Finance Portal
           </Typography>
         </Toolbar>
       </AppBar>
